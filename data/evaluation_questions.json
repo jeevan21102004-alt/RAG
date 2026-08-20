@@ -1,0 +1,142 @@
+[
+  {
+    "question": "What is machine learning?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["machine_learning_intro.md"]
+  },
+  {
+    "question": "What is supervised learning?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "question": "What tasks is supervised learning used for?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "question": "What is overfitting?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["overfitting.md"]
+  },
+  {
+    "question": "How does the document describe a model that overfits?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["overfitting.md"]
+  },
+  {
+    "question": "What common workflow is described for machine learning?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["machine_learning_intro.md"]
+  },
+  {
+    "question": "Which example tasks are mentioned for supervised learning?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "question": "What does the document say machine learning programs learn from?",
+    "category": "retrieval_required",
+    "expected_action": "SEARCH",
+    "expected_answer_available": true,
+    "relevant_documents": ["machine_learning_intro.md"]
+  },
+  {
+    "question": "What is 2 + 2?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "What is the capital of France?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "What color is the sky on a clear day?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "What comes after Monday?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "How many days are in a week?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "Is water wet?",
+    "category": "retrieval_not_required",
+    "expected_action": "ANSWER",
+    "expected_answer_available": true,
+    "relevant_documents": []
+  },
+  {
+    "question": "What learning rate is used in the sample documents?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  },
+  {
+    "question": "What optimizer does the sample material use?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  },
+  {
+    "question": "Which neural network architecture is described in the documents?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  },
+  {
+    "question": "What is the publication year of the sample documents?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  },
+  {
+    "question": "How many training examples are used in the sample documents?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  },
+  {
+    "question": "What model architecture is recommended in the sample documents?",
+    "category": "insufficient_context",
+    "expected_action": "SEARCH",
+    "expected_answer_available": false,
+    "relevant_documents": []
+  }
+]
