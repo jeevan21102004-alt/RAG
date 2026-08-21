@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import os
+import time
 
 from dotenv import load_dotenv
+from openai import APIConnectionError
+from openai import APITimeoutError
+from openai import InternalServerError
 from openai import OpenAI
+from openai import RateLimitError
 
 
-DEFAULT_MODEL_NAME = "meta/llama-3.1-70b-instruct"
-DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1"
+DEFAULT_MODEL_NAME = "gemini-3.7-flash"
+DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 def build_prompt(question: str, context: str) -> str:
@@ -32,34 +37,44 @@ def build_prompt(question: str, context: str) -> str:
     )
 
 
-def generate_text(prompt: str) -> str:
+def generate_text(prompt: str, max_retries: int = 1) -> str:
     load_dotenv()
-    api_key = os.getenv("NVIDIA_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError("NVIDIA_API_KEY is missing. Add it to the .env file.")
+        raise RuntimeError("GEMINI_API_KEY is missing. Add it to the .env file.")
 
-    model_name = os.getenv("NVIDIA_MODEL_NAME", DEFAULT_MODEL_NAME)
-    base_url = os.getenv("NVIDIA_BASE_URL", DEFAULT_BASE_URL)
+    base_url = os.getenv("GEMINI_BASE_URL", DEFAULT_BASE_URL)
+    model_name = os.getenv("GEMINI_MODEL_NAME", DEFAULT_MODEL_NAME)
 
     client = OpenAI(api_key=api_key, base_url=base_url)
-    response = client.chat.completions.create(
-        model=model_name,
-        messages=[
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.0,
-    )
 
-    choices = getattr(response, "choices", None)
-    if not choices:
-        raise RuntimeError("NVIDIA returned an empty response.")
+    last_error: Exception | None = None
+    for attempt in range(max_retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.0,
+            )
+            choices = getattr(response, "choices", None)
+            if not choices:
+                raise RuntimeError("Gemini returned an empty response.")
+            message = choices[0].message
+            answer = getattr(message, "content", None)
+            if not answer:
+                raise RuntimeError("Gemini returned an empty message.")
+            return answer.strip()
+        except (RateLimitError, InternalServerError, APIConnectionError, APITimeoutError) as error:
+            last_error = error
+            if attempt >= max_retries:
+                break
+            time.sleep(5.0)
 
-    message = choices[0].message
-    answer = getattr(message, "content", None)
-    if not answer:
-        raise RuntimeError("NVIDIA returned an empty message.")
-
-    return answer.strip()
+    if last_error:
+        raise last_error
+    raise RuntimeError("Gemini request failed.")
 
 
 def generate_answer(question: str, context: str) -> str:

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .agent import ANSWER, SEARCH
@@ -12,6 +14,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATASET_PATH = PROJECT_ROOT / "data" / "evaluation_questions.json"
 RESULTS_DIR = PROJECT_ROOT / "evaluation"
 RESULTS_PATH = RESULTS_DIR / "results.json"
+
+QUICK_MODE_SIZE = 6
+QUICK_MODE_PER_CATEGORY = 2
+QUICK_MODE_CATEGORIES = ("retrieval_required", "retrieval_not_required", "insufficient_context")
 
 
 @dataclass(frozen=True)
@@ -42,6 +48,15 @@ def load_evaluation_dataset(path: Path | None = None) -> list[EvaluationQuestion
     dataset_path = path or DATASET_PATH
     payload = json.loads(dataset_path.read_text(encoding="utf-8"))
     return [EvaluationQuestion(**item) for item in payload]
+
+
+def select_quick_questions(dataset: list[EvaluationQuestion]) -> list[EvaluationQuestion]:
+    """Deterministically select 2 questions from each of the 3 categories."""
+    selected: list[EvaluationQuestion] = []
+    for category in QUICK_MODE_CATEGORIES:
+        category_questions = [question for question in dataset if question.category == category]
+        selected.extend(category_questions[:QUICK_MODE_PER_CATEGORY])
+    return selected
 
 
 def is_api_error(message: str | None) -> bool:
@@ -75,13 +90,22 @@ def _decision_is_correct(agent_action: str | None, expected_action: str) -> bool
     return agent_action == expected_action
 
 
-def run_evaluation(top_k: int = 3) -> tuple[list[EvaluationRecord], dict[str, float | int]]:
+def run_evaluation(
+    top_k: int = 3,
+    delay_between_questions: float = 5.0,
+    quick: bool = False,
+) -> tuple[list[EvaluationRecord], dict[str, float | int]]:
     dataset = load_evaluation_dataset()
+    if quick:
+        dataset = select_quick_questions(dataset)
     store = build_vector_store()
     records: list[EvaluationRecord] = []
 
-    for question in dataset:
+    for index, question in enumerate(dataset):
         result = run_agentic_rag(question.question, top_k=top_k, store=store)
+        # Add a delay between questions to avoid hitting API rate limits
+        if index < len(dataset) - 1:
+            time.sleep(delay_between_questions)
         agent_action = result.initial_decision.action if result.initial_decision else None
         answer_produced = result.final_answer is not None
         status = classify_status(result.failure)
@@ -153,10 +177,18 @@ def run_evaluation(top_k: int = 3) -> tuple[list[EvaluationRecord], dict[str, fl
     return records, metrics
 
 
-def save_results(records: list[EvaluationRecord], metrics: dict[str, float | int], path: Path | None = None) -> None:
+def save_results(
+    records: list[EvaluationRecord],
+    metrics: dict[str, float | int],
+    path: Path | None = None,
+    mode: str = "full",
+) -> None:
     results_path = path or RESULTS_PATH
     results_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "evaluation_mode": mode,
+        "api_error_count": metrics.get("api_errors", 0),
         "metrics": metrics,
         "records": [asdict(record) for record in records],
     }
