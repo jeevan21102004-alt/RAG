@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "train_questions": [
+    "What is machine learning?",
+    "What is supervised learning?",
+    "What tasks is supervised learning used for?",
+    "What is overfitting?",
+    "Which example tasks are mentioned for supervised learning?",
+    "What does the document say machine learning programs learn from?",
+    "What is 2 + 2?",
+    "What color is the sky on a clear day?",
+    "What comes after Monday?",
+    "How many days are in a week?",
+    "What optimizer does the sample material use?",
+    "Which neural network architecture is described in the documents?",
+    "What is the publication year of the sample documents?",
+    "How many training examples are used in the sample documents?"
+  ],
+  "test_questions": [
+    "How does the document describe a model that overfits?",
+    "What common workflow is described for machine learning?",
+    "What is the capital of France?",
+    "Is water wet?",
+    "What learning rate is used in the sample documents?",
+    "What model architecture is recommended in the sample documents?"
+  ]
+}
