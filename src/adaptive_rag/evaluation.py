@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .agent import ANSWER, SEARCH
 from .app import build_vector_store, run_agentic_rag
+from .reward import calculate_reward
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -42,6 +43,8 @@ class EvaluationRecord:
     status: str
     failure: str | None
     correct_decision: bool
+    reward: int | None = None
+    reward_reason: str | None = None
 
 
 def load_evaluation_dataset(path: Path | None = None) -> list[EvaluationQuestion]:
@@ -110,6 +113,14 @@ def run_evaluation(
         answer_produced = result.final_answer is not None
         status = classify_status(result.failure)
         correct_decision = _decision_is_correct(agent_action, question.expected_action) if status == "SUCCESS" else False
+
+        reward: int | None = None
+        reward_reason: str | None = None
+        if status == "SUCCESS" and agent_action is not None:
+            reward_result = calculate_reward(question.expected_action, agent_action)
+            reward = reward_result.reward
+            reward_reason = reward_result.reason
+
         records.append(
             EvaluationRecord(
                 question=question.question,
@@ -123,6 +134,8 @@ def run_evaluation(
                 status=status,
                 failure=result.failure,
                 correct_decision=correct_decision,
+                reward=reward,
+                reward_reason=reward_reason,
             )
         )
 
@@ -152,6 +165,23 @@ def run_evaluation(
         retrieval_success / len(retrieval_expected_records) * 100.0 if retrieval_expected_records else 0.0
     )
 
+    rewarded_records = [record for record in successful_records if record.reward is not None]
+    total_reward = sum(record.reward for record in rewarded_records if record.reward is not None)
+    average_reward = total_reward / len(rewarded_records) if rewarded_records else 0.0
+    correct_decision_reward = sum(
+        record.reward for record in rewarded_records if record.reward is not None and record.reward > 0
+    )
+    unnecessary_search_penalty = sum(
+        record.reward
+        for record in rewarded_records
+        if record.reward is not None and record.reward == -1
+    )
+    missed_search_penalty = sum(
+        record.reward
+        for record in rewarded_records
+        if record.reward is not None and record.reward == -3
+    )
+
     metrics = {
         "total_questions": total,
         "successful_runs": successful_runs,
@@ -172,6 +202,11 @@ def run_evaluation(
         ),
         "average_retrieval_attempts": average_retrieval_attempts,
         "retrieval_success_rate": retrieval_success_rate,
+        "total_reward": total_reward,
+        "average_reward": average_reward,
+        "correct_decision_reward": correct_decision_reward,
+        "unnecessary_search_penalty": unnecessary_search_penalty,
+        "missed_search_penalty": missed_search_penalty,
     }
 
     return records, metrics
