@@ -49,6 +49,7 @@ class EvaluationResult:
 
     Scores are optional and may be filled in by the evaluation engine.
     status indicates the outcome: SUCCESS, API_ERROR, ERROR, etc.
+    metadata stores structured component scores and other diagnostic info.
     """
 
     case_id: str
@@ -66,6 +67,7 @@ class EvaluationResult:
     overall_score: float | None = None
     status: str = "SUCCESS"
     failure_reason: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
