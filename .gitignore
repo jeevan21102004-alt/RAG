@@ -9,5 +9,11 @@ __pycache__/
 .ruff_cache/
 storage/*.json
 !storage/.gitkeep
+storage/semantic_embeddings.json
+.huggingface/
+.cache/huggingface/
+models/*.pt
+!models/retrieval_policy.pt
+!models/semantic_retrieval_policy.pt
 
 
