@@ -28,6 +28,7 @@ from .evaluation_schema import EvaluationCase, SystemResponse
 # ---------------------------------------------------------------------------
 
 # Common English stop-words used to filter out low-information tokens.
+# Includes function words, question words, and contractions.
 _STOP_WORDS: frozenset[str] = frozenset(
     {
         "a", "an", "the", "and", "or", "but", "if", "then", "of", "to", "in",
@@ -37,6 +38,9 @@ _STOP_WORDS: frozenset[str] = frozenset(
         "those", "i", "you", "he", "she", "it", "we", "they", "them", "his",
         "her", "its", "our", "their", "from", "by", "as", "not", "no", "so",
         "than", "too", "very", "s", "t", "don", "ll", "ve", "re", "m",
+        # Question words (function words, not content words)
+        "what", "how", "why", "when", "where", "which", "who", "whom",
+        "whose", "whether",
     }
 )
 
