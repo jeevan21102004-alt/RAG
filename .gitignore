@@ -16,4 +16,8 @@ models/*.pt
 !models/retrieval_policy.pt
 !models/semantic_retrieval_policy.pt
 
+# Generated experiment result artifacts (temporary outputs, not source)
+experiments/results/*.json
+!experiments/results/.gitkeep
+
 

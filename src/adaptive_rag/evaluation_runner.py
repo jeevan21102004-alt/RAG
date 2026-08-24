@@ -35,6 +35,36 @@ DEFAULT_OVERALL_WEIGHTS: dict[str, float] = {
 
 
 # ---------------------------------------------------------------------------
+# Status classification
+# ---------------------------------------------------------------------------
+
+_API_ERROR_MARKERS: tuple[str, ...] = (
+    "429",
+    "503",
+    "timeout",
+    "unavailable",
+    "resource_exhausted",
+    "rate limit",
+    "quota",
+)
+
+
+def _classify_status(failure: str | None) -> str:
+    """Classify the result status from an optional failure message.
+
+    * ``None``            → ``"SUCCESS"``
+    * API-related failure → ``"API_ERROR"``
+    * Any other failure   → ``"ERROR"``
+    """
+    if not failure:
+        return "SUCCESS"
+    lowered = failure.lower()
+    if any(marker in lowered for marker in _API_ERROR_MARKERS):
+        return "API_ERROR"
+    return "ERROR"
+
+
+# ---------------------------------------------------------------------------
 # Retrieval scoring
 # ---------------------------------------------------------------------------
 
@@ -224,6 +254,10 @@ def run_evaluation(
     # --- 6. Assemble result ------------------------------------------------
     metadata: dict[str, Any] = dict(response.metadata)
 
+    # Record failures (e.g., API errors) captured by the adapter.
+    failure_reason: str | None = metadata.get("failure")
+    status = _classify_status(failure_reason)
+
     if answer_scores is not None:
         metadata["answer_scores"] = answer_scores.to_dict()
 
@@ -251,7 +285,7 @@ def run_evaluation(
         retrieval_score=retrieval_score,
         decision_score=decision_score,
         overall_score=overall_score,
-        status="SUCCESS",
-        failure_reason=None,
+        status=status,
+        failure_reason=failure_reason,
         metadata=metadata,
     )

@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "rb-001",
+    "question": "What is machine learning?",
+    "category": "retrieval_required",
+    "expected_answer": "Machine learning is a way to build programs that learn patterns from data instead of following only fixed rules.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["machine_learning_intro.md"]
+  },
+  {
+    "case_id": "rb-002",
+    "question": "What is supervised learning?",
+    "category": "retrieval_required",
+    "expected_answer": "In supervised learning, the model learns from examples that include both inputs and the correct answers.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "case_id": "rb-003",
+    "question": "What tasks is supervised learning used for?",
+    "category": "retrieval_required",
+    "expected_answer": "It is often used for classification and regression tasks, such as predicting whether an email is spam or estimating a house price.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "case_id": "rb-004",
+    "question": "What is overfitting?",
+    "category": "retrieval_required",
+    "expected_answer": "Overfitting happens when a model learns the training data too well and does not generalize well to new data.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["overfitting.md"]
+  },
+  {
+    "case_id": "rb-005",
+    "question": "How does the document describe a model that overfits?",
+    "category": "retrieval_required",
+    "expected_answer": "A model that overfits may perform very well on the examples it has already seen, but poorly on fresh examples.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["overfitting.md"]
+  },
+  {
+    "case_id": "rb-006",
+    "question": "What common workflow is described for machine learning?",
+    "category": "retrieval_required",
+    "expected_answer": "A common workflow is to collect data, prepare it, train a model, and then use the model to make predictions or decisions.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["machine_learning_intro.md"]
+  },
+  {
+    "case_id": "rb-007",
+    "question": "Which example tasks are mentioned for supervised learning?",
+    "category": "retrieval_required",
+    "expected_answer": "Classification and regression tasks, such as predicting whether an email is spam or estimating a house price.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["supervised_learning.md"]
+  },
+  {
+    "case_id": "rb-008",
+    "question": "What does the document say machine learning programs learn from?",
+    "category": "retrieval_required",
+    "expected_answer": "Machine learning programs learn patterns from data instead of following only fixed rules.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["machine_learning_intro.md"]
+  }
+]

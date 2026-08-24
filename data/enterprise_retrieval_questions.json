@@ -1,0 +1,162 @@
+[
+  {
+    "case_id": "ent-001",
+    "question": "How many days of paid annual leave does a full-time employee receive per year?",
+    "category": "enterprise_hr",
+    "expected_answer": "24 days of paid annual leave per calendar year.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["leave_policy.md"]
+  },
+  {
+    "case_id": "ent-002",
+    "question": "What is the maximum number of remote work days allowed per week?",
+    "category": "enterprise_hr",
+    "expected_answer": "Up to 3 days per week.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["remote_work_policy.md"]
+  },
+  {
+    "case_id": "ent-003",
+    "question": "What is the annual wellness stipend amount for employees?",
+    "category": "enterprise_hr",
+    "expected_answer": "15,000 rupees per year.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["employee_benefits.md"]
+  },
+  {
+    "case_id": "ent-004",
+    "question": "How many weeks of fully paid parental leave does the primary caregiver receive?",
+    "category": "enterprise_hr",
+    "expected_answer": "26 weeks of fully paid parental leave.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["parental_leave.md"]
+  },
+  {
+    "case_id": "ent-005",
+    "question": "What is the grace period for morning arrival before being marked late?",
+    "category": "enterprise_hr",
+    "expected_answer": "A grace period of 15 minutes.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["attendance_policy.md"]
+  },
+  {
+    "case_id": "ent-006",
+    "question": "Who must approve every production deployment?",
+    "category": "enterprise_engineering",
+    "expected_answer": "The owning team's tech lead and the on-call SRE engineer.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["deployment_guidelines.md"]
+  },
+  {
+    "case_id": "ent-007",
+    "question": "What is the p95 latency target for interactive API endpoints?",
+    "category": "enterprise_engineering",
+    "expected_answer": "Below 300 milliseconds measured at the gateway.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["api_standards.md"]
+  },
+  {
+    "case_id": "ent-008",
+    "question": "What is the maximum recommended pull request size in changed lines?",
+    "category": "enterprise_engineering",
+    "expected_answer": "Below 400 changed lines excluding tests and generated files.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["coding_standards.md"]
+  },
+  {
+    "case_id": "ent-009",
+    "question": "During a SEV1 incident, how often must status updates be posted?",
+    "category": "enterprise_engineering",
+    "expected_answer": "Every 30 minutes.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["incident_management.md"]
+  },
+  {
+    "case_id": "ent-010",
+    "question": "What is the minimum code coverage requirement on changed files?",
+    "category": "enterprise_engineering",
+    "expected_answer": "80 percent line coverage.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["testing_guidelines.md"]
+  },
+  {
+    "case_id": "ent-011",
+    "question": "What is the domestic hotel reimbursement cap per night for standard employees?",
+    "category": "enterprise_finance",
+    "expected_answer": "4,000 rupees per night.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["travel_policy.md"]
+  },
+  {
+    "case_id": "ent-012",
+    "question": "Within how many days must expense reports be submitted after the expense date?",
+    "category": "enterprise_finance",
+    "expected_answer": "Within 30 days.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["expense_policy.md"]
+  },
+  {
+    "case_id": "ent-013",
+    "question": "How long does reimbursement processing take after final approval?",
+    "category": "enterprise_finance",
+    "expected_answer": "Within 10 business days.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["reimbursement_policy.md"]
+  },
+  {
+    "case_id": "ent-014",
+    "question": "Above what purchase amount is CFO approval required?",
+    "category": "enterprise_finance",
+    "expected_answer": "Purchases above 100,000 rupees require CFO approval.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["procurement_policy.md"]
+  },
+  {
+    "case_id": "ent-015",
+    "question": "What is the price of the professional plan?",
+    "category": "enterprise_product",
+    "expected_answer": "2,499 rupees per month for up to 25 users.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["pricing_policy.md"]
+  },
+  {
+    "case_id": "ent-016",
+    "question": "How often do product releases ship?",
+    "category": "enterprise_product",
+    "expected_answer": "Every 2 weeks on Wednesday.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["release_process.md"]
+  },
+  {
+    "case_id": "ent-017",
+    "question": "What is the password expiration period for standard accounts?",
+    "category": "enterprise_security",
+    "expected_answer": "Every 90 days.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["password_policy.md"]
+  },
+  {
+    "case_id": "ent-018",
+    "question": "What is the hotel cap for senior managers and what monthly expense amount requires director approval?",
+    "category": "enterprise_finance_multi",
+    "expected_answer": "Senior managers have a 6,000 rupees per night hotel cap; expenses between 50,000 and 200,000 rupees require director approval.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["travel_policy.md", "expense_policy.md"]
+  },
+  {
+    "case_id": "ent-019",
+    "question": "What is the password expiration period and what enrollment is required for personal devices used for work?",
+    "category": "enterprise_security_multi",
+    "expected_answer": "Passwords expire every 90 days; personal devices must enroll in MDM with a work container.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["password_policy.md", "device_security.md"]
+  },
+  {
+    "case_id": "ent-020",
+    "question": "What discount applies to annual contracts and how frequently are product releases scheduled?",
+    "category": "enterprise_product_multi",
+    "expected_answer": "Annual contracts receive a 15 percent discount; releases ship every 2 weeks.",
+    "expected_action": "SEARCH",
+    "relevant_documents": ["pricing_policy.md", "release_process.md"]
+  }
+]

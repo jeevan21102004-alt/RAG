@@ -1,0 +1,50 @@
+[
+  {
+    "experiment_id": "adaptiverag_exp_a",
+    "name": "Config A (chunk=100, overlap=20, top_k=3)",
+    "description": "AdaptiveRAG experiment with chunk_size=100, chunk_overlap=20, top_k=3",
+    "parameters": {
+      "chunk_size": 100,
+      "chunk_overlap": 20,
+      "top_k": 3,
+      "retrieval_strategy": "vector"
+    },
+    "tags": ["adaptiverag", "chunk_100", "top_k_3"]
+  },
+  {
+    "experiment_id": "adaptiverag_exp_b",
+    "name": "Config B (chunk=200, overlap=40, top_k=3)",
+    "description": "AdaptiveRAG experiment with chunk_size=200, chunk_overlap=40, top_k=3",
+    "parameters": {
+      "chunk_size": 200,
+      "chunk_overlap": 40,
+      "top_k": 3,
+      "retrieval_strategy": "vector"
+    },
+    "tags": ["adaptiverag", "chunk_200", "top_k_3"]
+  },
+  {
+    "experiment_id": "adaptiverag_exp_c",
+    "name": "Config C (chunk=300, overlap=50, top_k=5)",
+    "description": "AdaptiveRAG experiment with chunk_size=300, chunk_overlap=50, top_k=5",
+    "parameters": {
+      "chunk_size": 300,
+      "chunk_overlap": 50,
+      "top_k": 5,
+      "retrieval_strategy": "vector"
+    },
+    "tags": ["adaptiverag", "chunk_300", "top_k_5"]
+  },
+  {
+    "experiment_id": "adaptiverag_exp_d",
+    "name": "Config D (chunk=500, overlap=75, top_k=5)",
+    "description": "AdaptiveRAG experiment with chunk_size=500, chunk_overlap=75, top_k=5",
+    "parameters": {
+      "chunk_size": 500,
+      "chunk_overlap": 75,
+      "top_k": 5,
+      "retrieval_strategy": "vector"
+    },
+    "tags": ["adaptiverag", "chunk_500", "top_k_5"]
+  }
+]

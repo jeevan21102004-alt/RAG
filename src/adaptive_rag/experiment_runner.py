@@ -25,6 +25,7 @@ def run_experiment(
     config: ExperimentConfig,
     cases: list[EvaluationCase],
     adapter: SystemAdapter,
+    delay_between_questions: float = 0.0,
 ) -> ExperimentResult:
     """Run an experiment and produce an aggregated :class:`ExperimentResult`.
 
@@ -54,11 +55,15 @@ def run_experiment(
     """
     evaluation_results: list[EvaluationResult] = []
 
-    for case in cases:
+    for index, case in enumerate(cases):
         # Execute the AI system
         start_time = time.perf_counter()
         response = adapter.run(case, config)
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+
+        # Rate-limit protection between questions (optional)
+        if delay_between_questions > 0 and index < len(cases) - 1:
+            time.sleep(delay_between_questions)
 
         # Use measured latency if the adapter didn't provide one
         if response.latency_ms is None:
