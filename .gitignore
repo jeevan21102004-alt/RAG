@@ -19,5 +19,7 @@ models/*.pt
 # Generated experiment result artifacts (temporary outputs, not source)
 experiments/results/*.json
 !experiments/results/.gitkeep
+experiments/search_results/*.json
+!experiments/search_results/.gitkeep
 
 
