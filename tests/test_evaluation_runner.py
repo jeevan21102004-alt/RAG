@@ -28,7 +28,8 @@ class TestRetrievalScore(unittest.TestCase):
             retrieved_documents=["doc1.md"],
             relevant_documents=["doc1.md", "doc2.md"],
         )
-        self.assertEqual(score, 0.5)
+        # precision = 1.0, recall = 0.5, f1 = 2*1*0.5/(1+0.5) = 0.6667
+        self.assertAlmostEqual(score, 2 / 3, places=5)
 
     def test_no_relevant_documents_returns_none(self) -> None:
         score = calculate_retrieval_score(
@@ -50,6 +51,15 @@ class TestRetrievalScore(unittest.TestCase):
             relevant_documents=[],
         )
         self.assertIsNone(score)
+
+    def test_retrieval_score_uses_f1(self) -> None:
+        """Verify that retrieval_score is the F1 score, not raw recall."""
+        score = calculate_retrieval_score(
+            retrieved_documents=["doc1.md", "doc2.md", "doc3.md"],
+            relevant_documents=["doc1.md", "doc2.md"],
+        )
+        # precision = 2/3, recall = 1.0, f1 = 2*(2/3)*1.0 / (2/3 + 1.0) = 0.8
+        self.assertAlmostEqual(score, 0.8, places=5)
 
 
 class TestDecisionScore(unittest.TestCase):
@@ -237,6 +247,65 @@ class TestRunEvaluation(unittest.TestCase):
         self.assertIn("retrieval_score", result.metadata)
         self.assertIn("decision_score", result.metadata)
         self.assertIn("overall_weights", result.metadata)
+
+    def test_metadata_contains_retrieval_metrics(self) -> None:
+        case = self._make_case()
+        response = SystemResponse(
+            answer="Machine learning is a field of study.",
+            action="SEARCH",
+            retrieved_documents=["machine_learning_intro.md"],
+            retrieved_context="Machine learning is a field of study.",
+        )
+        result = run_evaluation(case, response)
+        self.assertIn("retrieval_metrics", result.metadata)
+        metrics = result.metadata["retrieval_metrics"]
+        self.assertIn("precision", metrics)
+        self.assertIn("recall", metrics)
+        self.assertIn("f1", metrics)
+
+    def test_metadata_contains_context_relevance(self) -> None:
+        case = self._make_case()
+        response = SystemResponse(
+            answer="Machine learning is a field of study.",
+            action="SEARCH",
+            retrieved_documents=["machine_learning_intro.md"],
+            retrieved_context="Machine learning is a field of study.",
+        )
+        result = run_evaluation(case, response)
+        self.assertIn("context_relevance", result.metadata)
+        self.assertIsNotNone(result.metadata["context_relevance"])
+
+    def test_retrieval_score_uses_f1(self) -> None:
+        """Verify that the retrieval_score in the result is the F1 score."""
+        case = self._make_case()
+        response = SystemResponse(
+            answer="Machine learning is a field of study.",
+            action="SEARCH",
+            retrieved_documents=["machine_learning_intro.md", "other_doc.md"],
+            retrieved_context="Machine learning is a field of study.",
+        )
+        result = run_evaluation(case, response)
+        # precision = 1/2, recall = 1.0, f1 = 2*(0.5)*1.0 / (0.5+1.0) = 0.6667
+        self.assertAlmostEqual(result.retrieval_score, 2 / 3, places=5)
+
+    def test_missing_retrieval_information_handled_safely(self) -> None:
+        case = EvaluationCase(
+            case_id="case-004",
+            question="What is 2 + 2?",
+            category="retrieval_not_required",
+            expected_answer="Four.",
+            expected_action="ANSWER",
+            relevant_documents=[],
+        )
+        response = SystemResponse(
+            answer="Four.",
+            action="ANSWER",
+        )
+        result = run_evaluation(case, response)
+        self.assertIsNone(result.retrieval_score)
+        self.assertIsNone(result.metadata.get("retrieval_metrics"))
+        self.assertIsNone(result.metadata.get("context_relevance"))
+        self.assertIsNotNone(result.overall_score)
 
     def test_default_overall_weights(self) -> None:
         self.assertEqual(DEFAULT_OVERALL_WEIGHTS["answer"], 0.60)
