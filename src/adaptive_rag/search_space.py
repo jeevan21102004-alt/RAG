@@ -175,3 +175,18 @@ class SearchSpace:
                 "top_k": [3, 5],
             },
         )
+
+    @classmethod
+    def adaptive_pilot(cls) -> "SearchSpace":
+        """Larger search space for Phase 3D adaptive search pilot.
+
+        7 x 5 x 5 = 175 possible configurations.
+        """
+        return cls(
+            name="adaptive-pilot",
+            parameter_values={
+                "chunk_size": [100, 150, 200, 250, 300, 400, 500],
+                "chunk_overlap": [10, 20, 40, 50, 75],
+                "top_k": [2, 3, 4, 5, 6],
+            },
+        )
