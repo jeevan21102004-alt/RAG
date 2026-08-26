@@ -1,0 +1,75 @@
+{
+  "architecture": {
+    "type": "MLP",
+    "state_dim": 15,
+    "hidden_dim": 64,
+    "n_actions": 175,
+    "layers": [
+      "Linear(15,64)",
+      "ReLU",
+      "Linear(64,175)"
+    ],
+    "activation": "ReLU",
+    "output": "Softmax over action IDs"
+  },
+  "seed": 42,
+  "episodes": 5,
+  "budget": 4,
+  "learning_rate": 0.001,
+  "gamma": 0.95,
+  "search_space": {
+    "name": "adaptive-pilot",
+    "parameter_values": {
+      "chunk_size": [
+        100,
+        150,
+        200,
+        250,
+        300,
+        400,
+        500
+      ],
+      "chunk_overlap": [
+        10,
+        20,
+        40,
+        50,
+        75
+      ],
+      "top_k": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  },
+  "training_split": [
+    "ent-020",
+    "ent-006",
+    "ent-015",
+    "ent-005",
+    "ent-010",
+    "ent-014",
+    "ent-016",
+    "ent-019",
+    "ent-007",
+    "ent-013",
+    "ent-018",
+    "ent-011",
+    "ent-002",
+    "ent-012"
+  ],
+  "test_split": [
+    "ent-003",
+    "ent-017",
+    "ent-008",
+    "ent-009",
+    "ent-001",
+    "ent-004"
+  ],
+  "loss_finite": true,
+  "final_loss": 0.29233837127685547,
+  "api_calls": 0
+}

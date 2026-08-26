@@ -373,7 +373,7 @@ class AdaptiveSearchEngine:
     # Main loop
     # ------------------------------------------------------------------
 
-    def run(self) -> AdaptiveSearchResult:
+    def run(self, cases_override: list[EvaluationCase] | None = None) -> AdaptiveSearchResult:
         """Execute the deterministic adaptive search.
 
         1. Deterministic initial exploration (corners + centre).
@@ -381,13 +381,20 @@ class AdaptiveSearchEngine:
            using the neighbour-average heuristic until the configuration
            budget is exhausted or the space is fully explored.
 
+        ``cases_override`` supplies an explicit question set (used by the
+        Phase 4 adaptive baseline).  When ``None``, cases are loaded from
+        the configured dataset path.
+
         Raises :class:`SearchSystemError` when the infrastructure itself
         is broken.  Individual configuration failures are recorded.
         """
-        try:
-            cases = load_search_cases(self.dataset, self.max_questions)
-        except ValueError as error:
-            raise SearchSystemError(f"Invalid dataset: {error}") from error
+        if cases_override is not None:
+            cases = list(cases_override)
+        else:
+            try:
+                cases = load_search_cases(self.dataset, self.max_questions)
+            except ValueError as error:
+                raise SearchSystemError(f"Invalid dataset: {error}") from error
         if not cases:
             raise SearchSystemError(
                 f"No evaluation cases could be loaded for dataset "

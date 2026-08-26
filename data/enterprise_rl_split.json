@@ -1,0 +1,28 @@
+{
+  "seed": 42,
+  "training_case_ids": [
+    "ent-020",
+    "ent-006",
+    "ent-015",
+    "ent-005",
+    "ent-010",
+    "ent-014",
+    "ent-016",
+    "ent-019",
+    "ent-007",
+    "ent-013",
+    "ent-018",
+    "ent-011",
+    "ent-002",
+    "ent-012"
+  ],
+  "test_case_ids": [
+    "ent-003",
+    "ent-017",
+    "ent-008",
+    "ent-009",
+    "ent-001",
+    "ent-004"
+  ],
+  "total": 20
+}
