@@ -63,7 +63,7 @@ if page == "Dashboard":
     c1.metric("Knowledge Base", f"{len(docs)} Documents")
     c2.metric("Benchmark", f"{len(questions)} Questions")
     c3.metric("Search Space", f"{space['total_configurations']} Configs")
-    c4.metric("Evaluation Tests", "321 Passing")
+    c4.metric("Evaluation Tests", "321 in prior baseline")
     st.write("Knowledge Base → Retrieval → Evaluation → "
              "Diagnosis → Optimization")
     st.bar_chart(documents_by_category())
