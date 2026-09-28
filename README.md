@@ -49,6 +49,11 @@ Major modules under `src/adaptive_rag/`:
 - `optimization_state.py`, `optimization_reward.py`, `rl_optimization_environment.py`, `configuration_policy.py`, `optimization_training.py`, `optimization_baselines.py`, `optimization_result.py` — Phase 4 RL configuration selection.
 - `dashboard_service.py` — thin, API-free service layer for the dashboard; no evaluation logic of its own.
 - `app/dashboard.py` — Streamlit dashboard (Demo Mode, no external API calls).
+- `query_classifier.py`, `query_sensitivity.py`, `query_aware_evaluation.py` — Phase 6A/6B/6C deterministic query classification, sensitivity sweeps, and query-aware evaluation (no LLM).
+- `adaptive_retrieval.py` — Phase 6D deterministic adaptive retrieval depth (per-query difficulty → top_k, no LLM/RL).
+- `adaptive_ablation.py` — Phase 6E ablation: FIXED_2 vs FIXED_4 vs FIXED_6 vs ADAPTIVE (80 retrieval-only evaluations).
+- `rag_service.py` — thin, Streamlit-independent service over the validated 300/40/top_k=2 config; `generation.py` — opt-in grounded generation reusing `llm.py`.
+- `app/chat.py` — Streamlit chat UI (retrieval-only default, opt-in generation).
 
 ## Enterprise benchmark
 
@@ -83,6 +88,40 @@ Random and Adaptive tied for the best measured objective (0.7434). RL scored
 lowest (0.6441) after only 5 training episodes — an exploratory smoke-test
 result, not evidence about RL in general.
 
+## Query-aware retrieval and adaptive depth (Phase 6)
+
+Phase 6 asks a narrower question than configuration search: does choosing
+`top_k` per query (adaptive depth) beat a single fixed `top_k`?
+
+The deterministic, feature-based policy (`adaptive_retrieval.py`, no LLM, no
+RL) maps LOW → top_k=2, MEDIUM → top_k=3, HIGH → top_k=4 over a fixed
+chunk_size=300 / overlap=40 context. Measured on the 20-question enterprise
+benchmark (12 SIMPLE, 5 TECHNICAL, 3 MULTI_DOCUMENT), retrieval-only, with a
+labelled deterministic budget of 4 distinct top_k values {2,3,4,6} x 20
+questions = 80 evaluations and zero API calls (`adaptive_ablation.py`,
+Phase 6E):
+
+| Policy | Precision | Recall | F1 | Context relevance | Objective |
+|--------|-----------|--------|-----|-------------------|-----------|
+| FIXED top_k=2 | 0.4750 | 0.8250 | 0.5917 | 0.7913 | 0.6818 |
+| FIXED top_k=4 | 0.2583 | 0.8750 | 0.3950 | 0.8222 | 0.5886 |
+| FIXED top_k=6 | 0.1858 | 0.9000 | 0.3045 | 0.8532 | 0.5357 |
+| ADAPTIVE (2/3/4) | 0.4042 | 0.8750 | 0.5500 | 0.7976 | 0.6622 |
+
+**Measured finding:** the fixed top_k=2 configuration is the best of the four
+on precision, F1 and the objective. Adaptive depth clearly beats the wider
+fixed settings (objective +0.0736 vs top_k=4, +0.1265 vs top_k=6) but does
+**not** beat fixed top_k=2 (F1 -0.0417, objective -0.0197, recall +0.0500).
+Raising top_k trades precision for recall — and slightly for context
+relevance — on this corpus.
+
+**What this result does not claim:** it is one synthetic 20-question
+benchmark evaluated with a 3-tier heuristic difficulty estimate, so it is not
+evidence that adaptive depth universally outperforms fixed depth — nor is the
+opposite established beyond this corpus. The practical takeaway acted on is
+the measured one: fixed top_k=2 at chunk_size=300 / overlap=40 is the
+configuration the application uses.
+
 ## Dashboard
 
 - Built with Streamlit (`app/dashboard.py`): `python -m streamlit run app/dashboard.py`.
@@ -91,6 +130,36 @@ result, not evidence about RL in general.
 - Uses the local enterprise corpus, live local retrieval evaluation (generation disabled), labelled saved experiment records, and explicit "Not evaluated" labels for unevaluated configurations.
 - Includes a failure-diagnosis view (existing engine) and an optimizer view showing the measured recommendation with its source.
 
+
+## Practical retrieval configuration
+
+The application path uses one validated configuration instead of the search
+space: **chunk_size=300 words, chunk_overlap=40 words, top_k=2** — the highest
+measured F1 (0.5917) and objective (0.6818) in the Phase 6E ablation above.
+It is defined once in `src/adaptive_rag/rag_service.py`
+(`get_validated_config()`) and reused by the chat UI, so service, UI and
+tests cannot drift apart.
+
+## Practical chat application
+
+```bat
+python -m streamlit run app/chat.py
+```
+
+- `app/chat.py` is a thin UI over `RAGService`: the query goes through
+  `query_rag` against the cached local corpus (`data/enterprise_kb/`), and
+  the UI only formats the returned chunks, context, sources and retrieval
+  metadata. There is no second retrieval pipeline.
+- **Retrieval-only is the default**: no LLM, no network, no API key required.
+- **Optional grounded generation is explicitly opt-in** via the UI toggle.
+  When enabled, only the retrieved context is passed to
+  `generate_grounded_answer` (`src/adaptive_rag/generation.py`), which reuses
+  the existing Gemini integration in `llm.py`. The key is read from
+  `GEMINI_API_KEY` inside `llm.py` (`.env`, gitignored) and is never shown in
+  the UI or logs, and no model call happens unless the toggle is on.
+- Generation failures never break retrieval: an empty context skips the
+  model, and any model error is surfaced as a warning while the retrieved
+  sources are still displayed.
 
 ## Installation
 
@@ -118,7 +187,10 @@ Currently verified dashboard tests:
 python -m unittest discover -s tests -p test_dashboard_service.py
 ```
 
-9 dashboard tests currently verified.
+Last measured offline run (no Gemini/API calls; generation tests inject a stub):
+9 dashboard tests, plus 49 tests across the six query-aware-retrieval and
+practical-app suites (adaptive retrieval 11, ablation 6, RAG service 8,
+generation 9, chat 8, practical flow 7) — all passing.
 
 The 321-test figure from the prior project baseline refers to the previously
 verified full suite, not a freshly re-run result in this documentation phase.
@@ -126,10 +198,10 @@ verified full suite, not a freshly re-run result in this documentation phase.
 ## Repository structure
 
 ```text
-app/                  Streamlit dashboard (dashboard.py)
-src/adaptive_rag/     Evaluation, diagnostics, experiments, search, RL, dashboard service
+app/                  Streamlit UIs: dashboard.py (evaluation demo), chat.py (practical chat)
+src/adaptive_rag/     Evaluation, diagnostics, experiments, search, RL, query-aware retrieval, service + generation layers
 data/                 Enterprise corpus (enterprise_kb/), benchmark questions, RL split
-tests/                Unit tests, including test_dashboard_service.py
+tests/                Unit tests (dashboard, adaptive retrieval/ablation, RAG service, generation, chat, practical flow)
 scripts/              Dataset generation and validation utilities
 models/               Saved policies and experiment metadata
 requirements.txt      Python dependencies
@@ -153,6 +225,8 @@ requirements.txt      Python dependencies
 - The Phase 4 comparison used a small smoke-test budget (4 evaluations per
   method, 5 RL training episodes), so results are exploratory.
 - The RL result is exploratory; no claim of global optimality is made for any method.
+- Adaptive depth was evaluated only against fixed top_k on a 20-question
+  synthetic benchmark; no claim of universal outperformance is made either way.
 - The dashboard is currently retrieval/demo focused.
 - Full production deployment is outside the project scope.
 
@@ -162,7 +236,7 @@ requirements.txt      Python dependencies
 - Stronger evaluation judges.
 - Broader optimization budgets.
 - Production integrations.
-- Optional live generation mode (explicitly opt-in, keyed).
+- Groundedness evaluation of the opt-in generation path (human or strong-model judge).
 
 ## Baseline RAG pipeline (original)
 

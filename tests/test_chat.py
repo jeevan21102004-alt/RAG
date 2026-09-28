@@ -28,6 +28,8 @@ class TestChatModule(unittest.TestCase):
         self.assertEqual(len(display["chunks"]),
                          len(response.retrieved_documents))
         self.assertEqual(display["context"], response.context)
+        self.assertIsNone(display["answer"])
+        self.assertFalse(display["generation_used"])
         self.assertIn("chunk_size=300", display["metadata"])
         self.assertEqual(display["config"],
                          {"chunk_size": 300, "chunk_overlap": 40, "top_k": 2})
@@ -57,10 +59,69 @@ class TestChatModule(unittest.TestCase):
                     called.add(func.id)
                 elif isinstance(func, ast.Attribute):
                     called.add(func.attr)
-        for banned in ("genai", "openai", "requests", "urllib",
-                       "generate_answer"):
+        for banned in ("genai", "openai", "requests", "urllib"):
             self.assertNotIn(banned, imported)
             self.assertNotIn(banned, called)
+        self.assertNotIn("generate_text", called)
+
+
+class TestChatGenerationToggle(unittest.TestCase):
+    def test_generation_disabled_makes_no_llm_call(self):
+        import app.chat as chat
+        calls = []
+
+        def exploding(_query, _context):
+            calls.append((_query, _context))
+            raise AssertionError("LLM must not be called")
+
+        handled = chat.handle_query_with_generation(
+            "What is the annual leave policy?",
+            generate=False, generate_fn=exploding)
+        self.assertIsNone(handled["generation"])
+        self.assertEqual(calls, [])
+        self.assertEqual(len(handled["response"].retrieved_documents), 2)
+        display = chat.format_response(handled["response"],
+                                       handled["generation"])
+        self.assertFalse(display["generation_used"])
+        self.assertIsNone(display["answer"])
+
+    def test_generation_enabled_invokes_mocked_generator(self):
+        import app.chat as chat
+        seen = {}
+
+        def stub(query, context):
+            seen["query"] = query
+            seen["context"] = context
+            return "mocked grounded answer"
+
+        handled = chat.handle_query_with_generation(
+            "What is the annual leave policy?",
+            generate=True, generate_fn=stub)
+        response = handled["response"]
+        generation = handled["generation"]
+        self.assertEqual(seen["context"], response.context)
+        self.assertEqual(seen["query"], response.query)
+        self.assertTrue(generation.generation_used)
+        display = chat.format_response(response, generation)
+        self.assertTrue(display["generation_used"])
+        self.assertEqual(display["answer"], "mocked grounded answer")
+        self.assertEqual(display["sources"], response.sources)
+
+    def test_generation_failure_still_exposes_retrieval(self):
+        import app.chat as chat
+
+        def failing(_query, _context):
+            raise RuntimeError("no key")
+
+        handled = chat.handle_query_with_generation(
+            "What is the annual leave policy?",
+            generate=True, generate_fn=failing)
+        self.assertFalse(handled["generation"].generation_used)
+        display = chat.format_response(handled["response"],
+                                       handled["generation"])
+        self.assertFalse(display["generation_used"])
+        self.assertIn("no key", display["generation_error"])
+        self.assertTrue(display["sources"])
 
 
 if __name__ == "__main__":
